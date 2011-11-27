@@ -221,13 +221,17 @@ namespace Webtools {
             }
             table.Append("</tbody></table>")
                 .AppendFormat("<input type=\"submit\" value=\"Submit\" onclick=\"submitForm('{0}')\" />", formId)
+                .AppendFormat("&nbsp;<a id=\"{0}_response_hider\" href=\"#\" onclick=\"$('#{0}_response').slideUp();$(this).fadeOut();return false;\" style=\"display: none\">Hide Responses</a>", formId)
                 .Append("</form>");
 
+
             //reponse
-            table.AppendFormat("<div id=\"{0}_response\" class=\"response\" style=\"display: none\">", formId)
+            table.AppendFormat("<div id=\"{0}_response\" class=\"response\" style=\"display: none\">", formId)                
+                .Append("<h4>URL</h4>")
+                .AppendFormat("<div class=\"response_url\" id=\"{0}_response_url\"></div>", formId)
                 .Append("<h4>Response Body</h4>")
                 .AppendFormat("<div class=\"response_body\" id=\"{0}_response_body\"></div>", formId)
-                .Append("<h4>Response Headers</h4>")
+                .Append("<h4>Response Status</h4>")
                 .AppendFormat("<div class=\"response_header\" id=\"{0}_response_header\"></div>", formId)
                 .Append("</div>");
 

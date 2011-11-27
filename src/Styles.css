@@ -262,6 +262,20 @@ table tbody tr.offset {
   margin: 0 0 20px 0;
 }
 
+#content div.response_url {
+  background-color: #fcf6db;
+  border: 1px solid black;
+  border-color: #e5e0c6;
+}
+
+#content div.response_url pre {
+  font-family: "Anonymous Pro", "Menlo", "Consolas", "Bitstream Vera Sans Mono", "Courier New", monospace;
+  padding: 10px;
+  font-size: 0.9em;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
 #content div.response_body {
   background-color: #fcf6db;
   border: 1px solid black;
@@ -269,6 +283,20 @@ table tbody tr.offset {
 }
 
 #content div.response_body pre {
+  font-family: "Anonymous Pro", "Menlo", "Consolas", "Bitstream Vera Sans Mono", "Courier New", monospace;
+  padding: 10px;
+  font-size: 0.9em;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+#content div.response_header {
+  background-color: #fcf6db;
+  border: 1px solid black;
+  border-color: #e5e0c6;
+}
+
+#content div.response_header pre {
   font-family: "Anonymous Pro", "Menlo", "Consolas", "Bitstream Vera Sans Mono", "Courier New", monospace;
   padding: 10px;
   font-size: 0.9em;
