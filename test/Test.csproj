@@ -79,9 +79,7 @@
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Models\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\src\APIBrowser.csproj">
       <Project>{32C6849D-F8ED-4FC2-B4E6-6695C65DE707}</Project>
