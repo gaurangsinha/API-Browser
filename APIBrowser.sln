@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "APIBrowser", "src\APIBrowser.csproj", "{32C6849D-F8ED-4FC2-B4E6-6695C65DE707}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example", "example\Example.csproj", "{548C6892-F0FC-42A3-BEF7-408D0607D9C2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "test\Test.csproj", "{548C6892-F0FC-42A3-BEF7-408D0607D9C2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
