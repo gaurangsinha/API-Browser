@@ -291,11 +291,12 @@ namespace Webtools {
                             htmlWriter.RenderEndTag();
                             htmlWriter.WriteBreak();
                             foreach (var a in AssembliesDisplayed) {
-                                htmlWriter.RenderBeginTag(HtmlTextWriterTag.B);
-                                htmlWriter.Write(a.FullName);
+                                htmlWriter.AddAttribute(HtmlTextWriterAttribute.Href, a.EscapedCodeBase);
+                                htmlWriter.RenderBeginTag(HtmlTextWriterTag.A);
+                                    htmlWriter.Write(a.EscapedCodeBase);
                                 htmlWriter.RenderEndTag();
                                 htmlWriter.WriteBreak();
-                                htmlWriter.Write("[{0}]", a.EscapedCodeBase);
+                                htmlWriter.Write("{0}, XmlDocumentation={1}", a.FullName, DocumentationExists(a.CodeBase));
                                 htmlWriter.WriteBreak();
                                 htmlWriter.WriteBreak();
                             }
@@ -437,6 +438,7 @@ namespace Webtools {
                         htmlWriter.Write(returnSummary);
                         htmlWriter.WriteBreak();
                     }
+                    htmlWriter.WriteBreak();
                 }
 
                 htmlWriter.AddAttribute(HtmlTextWriterAttribute.Id, formId);
