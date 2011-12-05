@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Web.UI;
 using System.Web.Routing;
+using System.Xml.Linq;
 
 namespace Webtools {
 
@@ -106,13 +107,111 @@ namespace Webtools {
         /// </summary>
         /// <param name="method">The method.</param>
         /// <returns></returns>
-        private static string IsMvcActionMethod(MethodInfo method) {
+        private string IsMvcActionMethod(MethodInfo method) {
             var attributes = method.GetCustomAttributes(true);
             foreach (var attrib in attributes) {
                 if (attrib.GetType().Name == "HttpPostAttribute")
                     return "POST";
                 if (attrib.GetType().Name == "HttpGetAttribute")
                     return "GET";
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Fetch XML documentation
+        /// </summary>
+        /// <param name="assemblyPath">The assembly path.</param>
+        /// <returns>LINQ XDocument</returns>
+        private XDocument FetchDocumentation(string assemblyPath) {
+            assemblyPath = assemblyPath.Replace("file:///", string.Empty);
+            return (!string.IsNullOrEmpty(assemblyPath) 
+                && File.Exists(assemblyPath)
+                && File.Exists(Path.ChangeExtension(assemblyPath, "xml"))) 
+                    ? XDocument.Load(Path.ChangeExtension(assemblyPath, "xml"))
+                    : null;
+        }
+
+        /// <summary>
+        /// Checks if documentation exists.
+        /// </summary>
+        /// <param name="assemblyPath">The assembly path.</param>
+        /// <returns></returns>
+        private bool DocumentationExists(string assemblyPath) {
+            return null != FetchDocumentation(assemblyPath);
+        }
+
+        /// <summary>
+        /// Fetches the documentation for the controller.
+        /// </summary>
+        /// <param name="assemblyPath">The assembly path.</param>
+        /// <param name="controller">The controller.</param>
+        /// <returns></returns>
+        private string FetchDocumentation(string assemblyPath, Type controller) {
+            XDocument xDoc = FetchDocumentation(assemblyPath);
+            if (null != xDoc) {
+                var doc = from m in xDoc.Descendants("member")
+                        where m.Attribute("name").Value == string.Format("T:{0}", controller.FullName)
+                        select m.Descendants("summary").FirstOrDefault().Value;
+                return null != doc ? doc.FirstOrDefault() : null;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Fetches the documentation.
+        /// </summary>
+        /// <param name="assemblyPath">The assembly path.</param>
+        /// <param name="method">The method.</param>
+        /// <returns></returns>
+        private XElement FetchDocumentationXML(string assemblyPath, MethodInfo method) {
+            XDocument xDoc = FetchDocumentation(assemblyPath);
+            if (null != xDoc) {
+                var doc = from m in xDoc.Descendants("member")
+                          where m.Attribute("name").Value == string.Format("M:{0}.{1}({2})",
+                                                                  method.DeclaringType.FullName,
+                                                                  method.Name,
+                                                                  string.Join(",",
+                                                                      Array.ConvertAll<ParameterInfo, string>(
+                                                                          method.GetParameters(),
+                                                                          p => p.ParameterType.FullName)))
+                          select m;
+                return null != doc ? doc.FirstOrDefault() : null;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Fetches documentation for the method.
+        /// </summary>
+        /// <param name="assemblyPath">The assembly path.</param>
+        /// <param name="method">The method.</param>
+        /// <param name="elementName">Name of the element.</param>
+        /// <returns></returns>
+        private string FetchDocumentation(string assemblyPath, MethodInfo method, string elementName="summary") {
+            XElement doc = FetchDocumentationXML(assemblyPath, method);
+            if (null != doc) {
+                var summary = from s in doc.Descendants(elementName)
+                              select s;
+                return null != summary && summary.Count() > 0 ? summary.FirstOrDefault().Value : null;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Fetches documentation for the method parameter.
+        /// </summary>
+        /// <param name="assemblyPath">The assembly path.</param>
+        /// <param name="method">The method.</param>
+        /// <param name="parameter">The parameter.</param>
+        /// <returns></returns>
+        private string FetchDocumentation(string assemblyPath, MethodInfo method, ParameterInfo parameter) {
+            XElement doc = FetchDocumentationXML(assemblyPath, method);
+            if (null != doc) {
+                var para = from p in doc.Descendants("param")
+                           where p.Attribute("name").Value == parameter.Name
+                           select p.Value;
+                return null != para ? para.FirstOrDefault() : null;
             }
             return null;
         }
@@ -131,8 +230,7 @@ namespace Webtools {
                     types.AddRange(assembly.GetTypes());
                 }
             }
-
-            //using(TextWriter tx = new StringWriter(str))
+            
             using (StreamWriter streamWriter = new StreamWriter(outputStream))
             using (HtmlTextWriter htmlWriter = new HtmlTextWriter(streamWriter)) {
                
@@ -241,12 +339,15 @@ namespace Webtools {
                     var mType = IsMvcActionMethod(method);
                     if (null != mType) {
                         if (false == titleHeaderExists) {
+                            if (DocumentationExists(controller.Assembly.CodeBase))
+                                htmlWriter.AddAttribute(HtmlTextWriterAttribute.Title, FetchDocumentation(controller.Assembly.CodeBase, controller));
                             htmlWriter.RenderBeginTag(HtmlTextWriterTag.H2);
                             htmlWriter.Write("/" + controller.Name.Replace("Controller", string.Empty));
                             htmlWriter.RenderEndTag();
                             titleHeaderExists = true;
-                            if (!AssembliesDisplayed.Contains(controller.Assembly))
+                            if (!AssembliesDisplayed.Contains(controller.Assembly)) {
                                 AssembliesDisplayed.Add(controller.Assembly);
+                            }
                         }
                         htmlWriter.RenderBeginTag(HtmlTextWriterTag.Div);
                         RenderMethod(htmlWriter, method);
@@ -288,7 +389,9 @@ namespace Webtools {
 
                     htmlWriter.AddAttribute(HtmlTextWriterAttribute.Class, "path");
                     htmlWriter.RenderBeginTag(HtmlTextWriterTag.Span);
-                            
+        
+                        if (DocumentationExists(method.DeclaringType.Assembly.CodeBase))
+                            htmlWriter.AddAttribute(HtmlTextWriterAttribute.Title, FetchDocumentation(method.DeclaringType.Assembly.CodeBase, method));
                         htmlWriter.AddAttribute(HtmlTextWriterAttribute.Href, "#" + formAction);
                         htmlWriter.AddAttribute(HtmlTextWriterAttribute.Onclick, "$('#" + formId + "_content').slideToggle(500);");            
                         htmlWriter.RenderBeginTag(HtmlTextWriterTag.A);
@@ -300,25 +403,41 @@ namespace Webtools {
                 htmlWriter.RenderEndTag();
 
             htmlWriter.RenderEndTag();
-            
+
             //render parameters
-            RenderMethodParameters(htmlWriter, method.GetParameters(), formId, httpMethod, formAction);
+            RenderMethodParameters(htmlWriter, method, method.GetParameters(), formId, httpMethod, formAction);
         }
 
         /// <summary>
         /// Renders the method parameters.
         /// </summary>
         /// <param name="htmlWriter">The HTML writer.</param>
+        /// <param name="methodInfo">The method info.</param>
         /// <param name="parameters">The parameters.</param>
         /// <param name="formId">The form id.</param>
         /// <param name="method">The method.</param>
         /// <param name="action">The action.</param>
-        private void RenderMethodParameters(HtmlTextWriter htmlWriter, ParameterInfo[] parameters, string formId, string method, string action) {
-            //
+        private void RenderMethodParameters(HtmlTextWriter htmlWriter, MethodInfo methodInfo, ParameterInfo[] parameters, string formId, string method, string action) {
+            bool addComments = false;
+
             htmlWriter.AddAttribute(HtmlTextWriterAttribute.Id, formId + "_content");
             htmlWriter.AddAttribute(HtmlTextWriterAttribute.Class, "content_" + method.ToLower());
             htmlWriter.AddAttribute(HtmlTextWriterAttribute.Style, "display: none;");
             htmlWriter.RenderBeginTag(HtmlTextWriterTag.Div);
+
+                string summary = FetchDocumentation(methodInfo.DeclaringType.Assembly.CodeBase, methodInfo);
+                if (!string.IsNullOrEmpty(summary)) {
+                    htmlWriter.Write(summary);
+                    htmlWriter.WriteBreak();
+                    string returnSummary = FetchDocumentation(methodInfo.DeclaringType.Assembly.CodeBase, methodInfo, "returns");
+                    if (!string.IsNullOrEmpty(returnSummary)) {
+                        htmlWriter.RenderBeginTag(HtmlTextWriterTag.B);
+                        htmlWriter.Write("Returns: ");
+                        htmlWriter.RenderEndTag();
+                        htmlWriter.Write(returnSummary);
+                        htmlWriter.WriteBreak();
+                    }
+                }
 
                 htmlWriter.AddAttribute(HtmlTextWriterAttribute.Id, formId);
                 htmlWriter.AddAttribute("action", action);
@@ -337,12 +456,19 @@ namespace Webtools {
                             htmlWriter.RenderBeginTag(HtmlTextWriterTag.Th);
                                 htmlWriter.Write("Type");
                             htmlWriter.RenderEndTag();
+                            if (DocumentationExists(methodInfo.DeclaringType.Assembly.CodeBase)) {
+                                htmlWriter.RenderBeginTag(HtmlTextWriterTag.Th);
+                                    htmlWriter.Write("Comment");
+                                htmlWriter.RenderEndTag();
+                                addComments = true;
+                            }
                         htmlWriter.RenderEndTag();
                     htmlWriter.RenderEndTag();
                     htmlWriter.RenderBeginTag(HtmlTextWriterTag.Tbody);
 
                     foreach (var parameter in parameters) {
                         htmlWriter.RenderBeginTag(HtmlTextWriterTag.Tr);
+                        htmlWriter.AddAttribute(HtmlTextWriterAttribute.Title, FetchDocumentation(methodInfo.DeclaringType.Assembly.CodeBase, methodInfo, parameter));
                             htmlWriter.RenderBeginTag(HtmlTextWriterTag.Td);
                                 htmlWriter.Write(parameter.Name);
                             htmlWriter.RenderEndTag();
@@ -356,6 +482,11 @@ namespace Webtools {
                             htmlWriter.RenderBeginTag(HtmlTextWriterTag.Td);
                                 htmlWriter.Write(parameter.ParameterType.Name);
                             htmlWriter.RenderEndTag();
+                            if (addComments) {
+                                htmlWriter.RenderBeginTag(HtmlTextWriterTag.Td);
+                                htmlWriter.Write(FetchDocumentation(methodInfo.DeclaringType.Assembly.CodeBase, methodInfo, parameter));
+                                htmlWriter.RenderEndTag();
+                            }
                         htmlWriter.RenderEndTag();
                     }
 
