@@ -4,15 +4,16 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 
-namespace example.Controllers
-{
-    public class TestController : Controller
-    {
+namespace example.Controllers {
+
+    /// <summary>
+    /// Controller to test APIBrowser
+    /// </summary>
+    public class TestController : Controller {
         //
         // GET: /Test/
 
-        public ActionResult Index()
-        {
+        public ActionResult Index() {
             return View();
         }
 
@@ -21,7 +22,7 @@ namespace example.Controllers
         /// Test method for HTTP GET
         /// </summary>
         /// <param name="name">The name.</param>
-        /// <returns></returns>
+        /// <returns>Hello [Name]</returns>
         [HttpGet]
         public string HelloGet(string name) {
             return string.Format("Hello {0}", name);
@@ -31,14 +32,14 @@ namespace example.Controllers
         /// Test method for HTTP POST
         /// </summary>
         /// <param name="name">The name.</param>
-        /// <returns></returns>
+        /// <returns>Hello [Name]</returns>
         [HttpPost]
         public string HelloPost(string name) {
             return string.Format("Hello {0}", name);
         }
 
         /// <summary>
-        /// Test method to demostrate different datatypes
+        /// Test method for HTTP GET to demostrate different datatypes
         /// </summary>
         /// <param name="intValue">The int value.</param>
         /// <param name="doubleValue">The double value.</param>
@@ -51,7 +52,7 @@ namespace example.Controllers
         }
 
         /// <summary>
-        /// Test method to demostrate different datatypes
+        /// Test method for HTTP POST to demostrate different datatypes
         /// </summary>
         /// <param name="intValue">The int value.</param>
         /// <param name="doubleValue">The double value.</param>
