@@ -250,9 +250,22 @@ namespace Webtools {
                             htmlWriter.Write(RetrieveEmbeddedResource("Webtools.APIBrowser.Styles.css"));
                         htmlWriter.RenderEndTag();
 
+                        //prettify css
+                        htmlWriter.AddAttribute(HtmlTextWriterAttribute.Type, "text/css");
+                        htmlWriter.AddAttribute(HtmlTextWriterAttribute.Href, "http://google-code-prettify.googlecode.com/svn/branches/release-1-Jun-2011/src/prettify.css");
+                        htmlWriter.AddAttribute(HtmlTextWriterAttribute.Rel, "stylesheet");
+                        htmlWriter.RenderBeginTag(HtmlTextWriterTag.Link);
+                        htmlWriter.RenderEndTag();
+
                         //jQuery
                         htmlWriter.AddAttribute(HtmlTextWriterAttribute.Type, "text/javascript");
                         htmlWriter.AddAttribute(HtmlTextWriterAttribute.Src, "http://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js");
+                        htmlWriter.RenderBeginTag(HtmlTextWriterTag.Script);
+                        htmlWriter.RenderEndTag();
+
+                        //google code pretty print
+                        htmlWriter.AddAttribute(HtmlTextWriterAttribute.Type, "text/javascript");
+                        htmlWriter.AddAttribute(HtmlTextWriterAttribute.Src, "http://google-code-prettify.googlecode.com/svn/branches/release-1-Jun-2011/src/prettify.js");
                         htmlWriter.RenderBeginTag(HtmlTextWriterTag.Script);
                         htmlWriter.RenderEndTag();
 

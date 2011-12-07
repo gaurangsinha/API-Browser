@@ -26,7 +26,9 @@
                 urlBox.html('<pre>' + this.url + '</pre>');
 
                 var responseBody = $("#" + responseBox.attr("id") + "_body");
-                responseBody.html('<pre>' + data + '</pre>');
+                responseBody.html('<pre><code class="prettyprint"></code></pre>');
+                $(responseBody[0].children[0].children[0]).text(xhr.responseText);
+                prettyPrint();
 
                 var responseHeader = $("#" + responseBox.attr("id") + "_header");
                 responseHeader.html('<pre>Status: ' + xhr.status + ' [' + xhr.statusText + ']</pre>');
