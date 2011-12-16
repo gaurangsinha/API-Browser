@@ -167,17 +167,15 @@ namespace Webtools {
         private XElement FetchDocumentationXML(string assemblyPath, MethodInfo method) {
             XDocument xDoc = FetchDocumentation(assemblyPath);
             if (null != xDoc) {
+                var parameters = method.GetParameters();
                 var doc = from m in xDoc.Descendants("member")
-                          where m.Attribute("name").Value == string.Format("M:{0}.{1}{2}",
+                          where m.Attribute("name").Value == string.Format(parameters.Length > 0 ? "M:{0}.{1}({2})" : "M:{0}.{1}{2}",
                                                                   method.DeclaringType.FullName,
                                                                   method.Name,
-                                                                  (method.GetParameters().Length > 0) 
-                                                                    ? string.Format("({0})",
-                                                                        string.Join(",",
-                                                                            Array.ConvertAll<ParameterInfo, string>(
-                                                                                method.GetParameters(),
-                                                                                p => p.ParameterType.FullName)))
-                                                                    : string.Empty)
+                                                                    string.Join(",",
+                                                                        Array.ConvertAll<ParameterInfo, string>(
+                                                                            parameters,
+                                                                            p => p.ParameterType.FullName)))
                           select m;
                 return null != doc ? doc.FirstOrDefault() : null;
             }
