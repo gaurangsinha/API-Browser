@@ -42,5 +42,22 @@
             <param name="stringValue">The string value.</param>
             <param name="dateTimeValue">The date time value.</param>
         </member>
+        <member name="T:example.Controllers.HomeController">
+            <summary>
+            Home Controller
+            </summary>
+        </member>
+        <member name="M:example.Controllers.HomeController.GetXML">
+            <summary>
+            Gets sample XML response.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:example.Controllers.HomeController.GetJSON">
+            <summary>
+            Gets sample JSON response.
+            </summary>
+            <returns></returns>
+        </member>
     </members>
 </doc>
