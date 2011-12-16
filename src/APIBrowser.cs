@@ -168,13 +168,16 @@ namespace Webtools {
             XDocument xDoc = FetchDocumentation(assemblyPath);
             if (null != xDoc) {
                 var doc = from m in xDoc.Descendants("member")
-                          where m.Attribute("name").Value == string.Format("M:{0}.{1}({2})",
+                          where m.Attribute("name").Value == string.Format("M:{0}.{1}{2}",
                                                                   method.DeclaringType.FullName,
                                                                   method.Name,
-                                                                  string.Join(",",
-                                                                      Array.ConvertAll<ParameterInfo, string>(
-                                                                          method.GetParameters(),
-                                                                          p => p.ParameterType.FullName)))
+                                                                  (method.GetParameters().Length > 0) 
+                                                                    ? string.Format("({0})",
+                                                                        string.Join(",",
+                                                                            Array.ConvertAll<ParameterInfo, string>(
+                                                                                method.GetParameters(),
+                                                                                p => p.ParameterType.FullName)))
+                                                                    : string.Empty)
                           select m;
                 return null != doc ? doc.FirstOrDefault() : null;
             }
@@ -459,58 +462,66 @@ namespace Webtools {
                 htmlWriter.AddAttribute("method", method);
                 htmlWriter.RenderBeginTag(HtmlTextWriterTag.Form);
 
-                htmlWriter.RenderBeginTag(HtmlTextWriterTag.Table);
+                if (null != parameters && parameters.Length > 0) {
+                    htmlWriter.RenderBeginTag(HtmlTextWriterTag.Table);
                     htmlWriter.RenderBeginTag(HtmlTextWriterTag.Thead);
-                        htmlWriter.RenderBeginTag(HtmlTextWriterTag.Tr);
-                            htmlWriter.RenderBeginTag(HtmlTextWriterTag.Th);
-                                htmlWriter.Write("Parameter");
-                            htmlWriter.RenderEndTag();
-                            htmlWriter.RenderBeginTag(HtmlTextWriterTag.Th);
-                                htmlWriter.Write("Value");
-                            htmlWriter.RenderEndTag();
-                            htmlWriter.RenderBeginTag(HtmlTextWriterTag.Th);
-                                htmlWriter.Write("Type");
-                            htmlWriter.RenderEndTag();
-                            if (DocumentationExists(methodInfo.DeclaringType.Assembly.CodeBase)) {
-                                htmlWriter.RenderBeginTag(HtmlTextWriterTag.Th);
-                                    htmlWriter.Write("Comment");
-                                htmlWriter.RenderEndTag();
-                                addComments = true;
-                            }
+                    htmlWriter.RenderBeginTag(HtmlTextWriterTag.Tr);
+                    htmlWriter.RenderBeginTag(HtmlTextWriterTag.Th);
+                    htmlWriter.Write("Parameter");
+                    htmlWriter.RenderEndTag();
+                    htmlWriter.RenderBeginTag(HtmlTextWriterTag.Th);
+                    htmlWriter.Write("Value");
+                    htmlWriter.RenderEndTag();
+                    htmlWriter.RenderBeginTag(HtmlTextWriterTag.Th);
+                    htmlWriter.Write("Type");
+                    htmlWriter.RenderEndTag();
+                    if (DocumentationExists(methodInfo.DeclaringType.Assembly.CodeBase)) {
+                        htmlWriter.RenderBeginTag(HtmlTextWriterTag.Th);
+                        htmlWriter.Write("Comment");
                         htmlWriter.RenderEndTag();
+                        addComments = true;
+                    }
+                    htmlWriter.RenderEndTag();
                     htmlWriter.RenderEndTag();
                     htmlWriter.RenderBeginTag(HtmlTextWriterTag.Tbody);
 
                     foreach (var parameter in parameters) {
                         htmlWriter.RenderBeginTag(HtmlTextWriterTag.Tr);
                         htmlWriter.AddAttribute(HtmlTextWriterAttribute.Title, FetchDocumentation(methodInfo.DeclaringType.Assembly.CodeBase, methodInfo, parameter));
+                        htmlWriter.RenderBeginTag(HtmlTextWriterTag.Td);
+                        htmlWriter.Write(parameter.Name);
+                        htmlWriter.RenderEndTag();
+                        htmlWriter.RenderBeginTag(HtmlTextWriterTag.Td);
+                        htmlWriter.AddAttribute(HtmlTextWriterAttribute.Id, formId + "_" + parameter.Name);
+                        htmlWriter.AddAttribute(HtmlTextWriterAttribute.Type, "text");
+                        htmlWriter.AddAttribute(HtmlTextWriterAttribute.Name, parameter.Name);
+                        htmlWriter.RenderBeginTag(HtmlTextWriterTag.Input);
+                        htmlWriter.RenderEndTag();
+                        htmlWriter.RenderEndTag();
+                        htmlWriter.RenderBeginTag(HtmlTextWriterTag.Td);
+                        htmlWriter.Write(parameter.ParameterType.Name);
+                        htmlWriter.RenderEndTag();
+                        if (addComments) {
                             htmlWriter.RenderBeginTag(HtmlTextWriterTag.Td);
-                                htmlWriter.Write(parameter.Name);
+                            htmlWriter.Write(FetchDocumentation(methodInfo.DeclaringType.Assembly.CodeBase, methodInfo, parameter));
                             htmlWriter.RenderEndTag();
-                            htmlWriter.RenderBeginTag(HtmlTextWriterTag.Td);
-                                htmlWriter.AddAttribute(HtmlTextWriterAttribute.Id, formId + "_" + parameter.Name);
-                                htmlWriter.AddAttribute(HtmlTextWriterAttribute.Type, "text");
-                                htmlWriter.AddAttribute(HtmlTextWriterAttribute.Name, parameter.Name);
-                                htmlWriter.RenderBeginTag(HtmlTextWriterTag.Input);
-                                htmlWriter.RenderEndTag();
-                            htmlWriter.RenderEndTag();
-                            htmlWriter.RenderBeginTag(HtmlTextWriterTag.Td);
-                                htmlWriter.Write(parameter.ParameterType.Name);
-                            htmlWriter.RenderEndTag();
-                            if (addComments) {
-                                htmlWriter.RenderBeginTag(HtmlTextWriterTag.Td);
-                                htmlWriter.Write(FetchDocumentation(methodInfo.DeclaringType.Assembly.CodeBase, methodInfo, parameter));
-                                htmlWriter.RenderEndTag();
-                            }
+                        }
                         htmlWriter.RenderEndTag();
                     }
 
                     //close tbody
                     htmlWriter.RenderEndTag();
 
-                //close table
-                htmlWriter.RenderEndTag();
-
+                    //close table
+                    htmlWriter.RenderEndTag();
+                }
+                else {
+                    //Show methods requires has parameters
+                    htmlWriter.RenderBeginTag(HtmlTextWriterTag.I);
+                    htmlWriter.Write("Method has no paramaters");
+                    htmlWriter.RenderEndTag();
+                    htmlWriter.WriteBreak();
+                }
                 htmlWriter.AddAttribute(HtmlTextWriterAttribute.Type, "submit");
                 htmlWriter.AddAttribute(HtmlTextWriterAttribute.Value, "Submit");
                 htmlWriter.RenderBeginTag(HtmlTextWriterTag.Input);
