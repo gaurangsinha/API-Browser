@@ -61,10 +61,7 @@ namespace Webtools {
         /// <param name="assembly">The assembly.</param>
         /// <returns></returns>
         private bool IgnoreAssembly(Assembly assembly) {
-            foreach (var name in ASSEMBLIES_TO_IGNORE)
-                if (assembly.FullName.StartsWith(name))
-                    return true;
-            return false;
+            return ASSEMBLIES_TO_IGNORE.Any(s => assembly.FullName.StartsWith(s));
         }
 
         /// <summary>
@@ -310,8 +307,9 @@ namespace Webtools {
                                     htmlWriter.Write(a.EscapedCodeBase);
                                 htmlWriter.RenderEndTag();
                                 htmlWriter.WriteBreak();
-                                htmlWriter.Write("{0}, XmlDocumentation={1}", a.FullName, DocumentationExists(a.CodeBase));
+                                htmlWriter.Write(a.FullName);
                                 htmlWriter.WriteBreak();
+                                htmlWriter.Write("Documentation : {0}", DocumentationExists(a.CodeBase) ? "Found" : "Not Found");
                                 htmlWriter.WriteBreak();
                             }
 
@@ -323,13 +321,17 @@ namespace Webtools {
                             htmlWriter.AddAttribute(HtmlTextWriterAttribute.Class, "footer");
                             htmlWriter.RenderBeginTag(HtmlTextWriterTag.Div);
                                 htmlWriter.Write("Powered by ");
-                                htmlWriter.AddAttribute(HtmlTextWriterAttribute.Href, "#");
+                                htmlWriter.AddAttribute(HtmlTextWriterAttribute.Href, "https://github.com/gaurangsinha/API-Browser");
                                 htmlWriter.RenderBeginTag(HtmlTextWriterTag.A);                
                                     htmlWriter.Write("API Browser");
                                 htmlWriter.RenderEndTag();
                                 htmlWriter.Write(", Version {0}", Assembly.GetExecutingAssembly().GetName().Version.ToString());
                                 htmlWriter.WriteBreak();
-                                htmlWriter.Write("Copyright (c) 2011 Gaurang Sinha. All rights reserved. Licensed under GPL version 2");
+                                htmlWriter.Write("MIT License, Copyright (C) 2011 ");
+                                htmlWriter.AddAttribute(HtmlTextWriterAttribute.Href, "http://gaurangs.com");
+                                htmlWriter.RenderBeginTag(HtmlTextWriterTag.A);
+                                    htmlWriter.Write("Gaurang Sinha");
+                                htmlWriter.RenderEndTag();
                             htmlWriter.RenderEndTag();
                         htmlWriter.RenderEndTag();
 
