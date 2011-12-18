@@ -13,10 +13,26 @@
             data: inputs.join('&'),
             url: this.action,
             type: this.method,
-            error: function () {
-                console.log("Failed to submit");
+            error: function (jqXHR, textStatus, errorThrown) {
+                //bg colour - #f6dbfc (Reddish)
+                responseBox.attr('style', 'display: block');
+
+                var hideButton = $("#" + responseBox.attr("id") + "_hider");
+                hideButton.attr('style', 'display: inline');
+
+                var urlBox = $("#" + responseBox.attr("id") + "_url");
+                urlBox.html('<pre style="background-color: #f6dbfc;">' + this.url + '</pre>');
+
+                var responseBody = $("#" + responseBox.attr("id") + "_body");
+                responseBody.html('<pre style="background-color: #f6dbfc;"><code class="prettyprint"></code></pre>');
+                $(responseBody[0].children[0].children[0]).text(jqXHR.responseText);
+                prettyPrint();
+
+                var responseHeader = $("#" + responseBox.attr("id") + "_header");
+                responseHeader.html('<pre style="background-color: #f6dbfc;">' + textStatus + ': ' + jqXHR.status + ' [' + errorThrown + ']</pre>');
             },
             success: function (data, status, xhr) {
+                //bg colour - #fcf6db (Yellowish)
                 responseBox.attr('style', 'display: block');
 
                 var hideButton = $("#" + responseBox.attr("id") + "_hider");

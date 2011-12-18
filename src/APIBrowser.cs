@@ -555,20 +555,20 @@ namespace Webtools {
                 htmlWriter.RenderEndTag();
 
                 htmlWriter.RenderBeginTag(HtmlTextWriterTag.H4);
-                    htmlWriter.Write("Response Body");
-                htmlWriter.RenderEndTag();
-
-                htmlWriter.AddAttribute(HtmlTextWriterAttribute.Id, formId + "_response_body");
-                htmlWriter.AddAttribute(HtmlTextWriterAttribute.Class, "response_body");
-                htmlWriter.RenderBeginTag(HtmlTextWriterTag.Div);
-                htmlWriter.RenderEndTag();
-
-                htmlWriter.RenderBeginTag(HtmlTextWriterTag.H4);
                 htmlWriter.Write("Response Status");
                 htmlWriter.RenderEndTag();
 
                 htmlWriter.AddAttribute(HtmlTextWriterAttribute.Id, formId + "_response_header");
                 htmlWriter.AddAttribute(HtmlTextWriterAttribute.Class, "response_header");
+                htmlWriter.RenderBeginTag(HtmlTextWriterTag.Div);
+                htmlWriter.RenderEndTag();
+
+                htmlWriter.RenderBeginTag(HtmlTextWriterTag.H4);
+                    htmlWriter.Write("Response Body");
+                htmlWriter.RenderEndTag();
+
+                htmlWriter.AddAttribute(HtmlTextWriterAttribute.Id, formId + "_response_body");
+                htmlWriter.AddAttribute(HtmlTextWriterAttribute.Class, "response_body");
                 htmlWriter.RenderBeginTag(HtmlTextWriterTag.Div);
                 htmlWriter.RenderEndTag();
 
