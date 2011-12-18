@@ -15,6 +15,13 @@ Setting up API Browser
             <add verb="GET" path="apibrowser.axd" type="Webtools.APIBrowser, APIBrowser" />
         </httpHandlers>
     </system.web>
+    
+	<system.webServer>
+		<handlers>
+			<add name="APIBrowser" verb="GET" path="apibrowser.axd" type="Webtools.APIBrowser, APIBrowser" resourceType="Unspecified" />
+		</handlers>
+	</system.webServer>
+
 
 3) Add following line at the begining of `RegisterRoutes` method in `Global.asax` file.
 
@@ -33,7 +40,7 @@ The `Global.asax` file should now look like this:
     }
 
 
-4) Run project and point browser to `http://[localhost]:[port]/APIBrowser.axd`
+4) Build & Run the project. Point the browser to `http://[localhost]:[port]/APIBrowser.axd`
 
 How is the API Browser page generated
 -------------------------------------
@@ -47,7 +54,7 @@ License
 
 **MIT License**
 
-Copyright (C) 2011 Gaurang Sinha
+Copyright (c) 2011 Gaurang Sinha
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
