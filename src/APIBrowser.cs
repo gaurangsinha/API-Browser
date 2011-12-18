@@ -406,6 +406,7 @@ namespace Webtools {
                     htmlWriter.AddAttribute(HtmlTextWriterAttribute.Class, "http_method");
                     htmlWriter.RenderBeginTag(HtmlTextWriterTag.Span);
 
+                        htmlWriter.AddAttribute(HtmlTextWriterAttribute.Name, formAction);
                         htmlWriter.AddAttribute(HtmlTextWriterAttribute.Href, "#" + formAction);
                         htmlWriter.AddAttribute(HtmlTextWriterAttribute.Onclick, "$('#" + formId + "_content').slideToggle(500);");
                         htmlWriter.RenderBeginTag(HtmlTextWriterTag.A);
