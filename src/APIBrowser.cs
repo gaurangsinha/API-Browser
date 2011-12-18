@@ -139,44 +139,56 @@ namespace Webtools {
         }
 
         /// <summary>
+        /// Fetches the documentation.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="assemblyPath">The assembly path.</param>
+        /// <param name="handler">The handler.</param>
+        /// <returns></returns>
+        private T FetchDocumentation<T>(string assemblyPath, Func<XDocument, T> handler) {
+            var xDoc = FetchDocumentation(assemblyPath);
+            return null != xDoc ? handler(xDoc) : default(T);
+        }
+
+        /// <summary>
         /// Fetches the documentation for the controller.
         /// </summary>
         /// <param name="assemblyPath">The assembly path.</param>
         /// <param name="controller">The controller.</param>
         /// <returns></returns>
         private string FetchDocumentation(string assemblyPath, Type controller) {
-            XDocument xDoc = FetchDocumentation(assemblyPath);
-            if (null != xDoc) {
-                var doc = from m in xDoc.Descendants("member")
-                        where m.Attribute("name").Value == string.Format("T:{0}", controller.FullName)
-                        select m.Descendants("summary").FirstOrDefault().Value;
-                return null != doc ? doc.FirstOrDefault() : null;
-            }
-            return null;
+            return FetchDocumentation<string>(assemblyPath,
+                    xDoc => {
+                        var doc = from m in xDoc.Descendants("member")
+                                  where m.Attribute("name").Value == string.Format("T:{0}", controller.FullName)
+                                  select m.Descendants("summary").FirstOrDefault().Value;
+                        return null != doc ? doc.FirstOrDefault() : null;
+                    });
         }
 
         /// <summary>
         /// Fetches the documentation.
         /// </summary>
+        /// <typeparam name="T"></typeparam>
         /// <param name="assemblyPath">The assembly path.</param>
         /// <param name="method">The method.</param>
+        /// <param name="handler">The handler.</param>
         /// <returns></returns>
-        private XElement FetchDocumentationXML(string assemblyPath, MethodInfo method) {
-            XDocument xDoc = FetchDocumentation(assemblyPath);
-            if (null != xDoc) {
-                var parameters = method.GetParameters();
-                var doc = from m in xDoc.Descendants("member")
-                          where m.Attribute("name").Value == string.Format(parameters.Length > 0 ? "M:{0}.{1}({2})" : "M:{0}.{1}{2}",
-                                                                  method.DeclaringType.FullName,
-                                                                  method.Name,
-                                                                    string.Join(",",
-                                                                        Array.ConvertAll<ParameterInfo, string>(
-                                                                            parameters,
-                                                                            p => p.ParameterType.FullName)))
-                          select m;
-                return null != doc ? doc.FirstOrDefault() : null;
-            }
-            return null;
+        private T FetchDocumentation<T>(string assemblyPath, MethodInfo method, Func<XElement, T> handler) {
+            return FetchDocumentation<T>(assemblyPath,
+                xDoc => {
+                    var parameters = method.GetParameters();
+                    var doc = from m in xDoc.Descendants("member")
+                              where m.Attribute("name").Value == string.Format(parameters.Length > 0 ? "M:{0}.{1}({2})" : "M:{0}.{1}{2}",
+                                                                      method.DeclaringType.FullName,
+                                                                      method.Name,
+                                                                        string.Join(",",
+                                                                            Array.ConvertAll<ParameterInfo, string>(
+                                                                                parameters,
+                                                                                p => p.ParameterType.FullName)))
+                              select m;
+                    return null != doc ? handler(doc.FirstOrDefault()) : default(T);
+                });
         }
 
         /// <summary>
@@ -187,13 +199,13 @@ namespace Webtools {
         /// <param name="elementName">Name of the element.</param>
         /// <returns></returns>
         private string FetchDocumentation(string assemblyPath, MethodInfo method, string elementName="summary") {
-            XElement doc = FetchDocumentationXML(assemblyPath, method);
-            if (null != doc) {
-                var summary = from s in doc.Descendants(elementName)
-                              select s;
-                return null != summary && summary.Count() > 0 ? summary.FirstOrDefault().Value : null;
-            }
-            return null;
+            return FetchDocumentation<string>(
+                assemblyPath, 
+                method,
+                doc => {
+                    var summary = from s in doc.Descendants(elementName) select s;
+                    return null != summary && summary.Count() > 0 ? summary.FirstOrDefault().Value : null;
+                });
         }
 
         /// <summary>
@@ -204,14 +216,15 @@ namespace Webtools {
         /// <param name="parameter">The parameter.</param>
         /// <returns></returns>
         private string FetchDocumentation(string assemblyPath, MethodInfo method, ParameterInfo parameter) {
-            XElement doc = FetchDocumentationXML(assemblyPath, method);
-            if (null != doc) {
-                var para = from p in doc.Descendants("param")
-                           where p.Attribute("name").Value == parameter.Name
-                           select p.Value;
-                return null != para ? para.FirstOrDefault() : null;
-            }
-            return null;
+            return FetchDocumentation<string>(
+                assemblyPath,
+                method,
+                doc => {
+                    var para = from p in doc.Descendants("param")
+                               where p.Attribute("name").Value == parameter.Name
+                               select p.Value;
+                    return null != para ? para.FirstOrDefault() : null;
+                });
         }
         #endregion
 
@@ -516,7 +529,7 @@ namespace Webtools {
                     htmlWriter.RenderEndTag();
                 }
                 else {
-                    //Show methods requires has parameters
+                    //Show method requires no parameters
                     htmlWriter.RenderBeginTag(HtmlTextWriterTag.I);
                     htmlWriter.Write("Method has no paramaters");
                     htmlWriter.RenderEndTag();
