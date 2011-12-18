@@ -29,7 +29,7 @@
                 prettyPrint();
 
                 var responseHeader = $("#" + responseBox.attr("id") + "_header");
-                responseHeader.html('<pre style="background-color: #f6dbfc;">' + textStatus + ': ' + jqXHR.status + ' [' + errorThrown + ']</pre>');
+                responseHeader.html('<pre style="background-color: #f6dbfc;"><b>' + textStatus + ': ' + jqXHR.status + ' [' + errorThrown + ']</b></pre>');
             },
             success: function (data, status, xhr) {
                 //bg colour - #fcf6db (Yellowish)

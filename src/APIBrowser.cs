@@ -236,10 +236,8 @@ namespace Webtools {
         /// <param name="assemblies">The assemblies.</param>
         private void RenderPageFromAssembly(Stream outputStream, Assembly[] assemblies) {
             List<Type> types = new List<Type>();
-            foreach (var assembly in assemblies) {
-                if (!IgnoreAssembly(assembly)) {
-                    types.AddRange(assembly.GetTypes());
-                }
+            foreach (var assembly in assemblies.Where(a => !IgnoreAssembly(a))) {
+                types.AddRange(assembly.GetTypes().Where(t => IsController(t)));
             }
             
             using (StreamWriter streamWriter = new StreamWriter(outputStream))
@@ -296,13 +294,12 @@ namespace Webtools {
                         htmlWriter.Write("API Browser");
                         htmlWriter.RenderEndTag();
 
-                        //Find all the controller types
+                        //Render all the controller types
                         htmlWriter.AddAttribute(HtmlTextWriterAttribute.Id, "content");
                         htmlWriter.RenderBeginTag(HtmlTextWriterTag.Div);
+
                             foreach (var type in types) {
-                                if (IsController(type)) {
-                                    RenderController(htmlWriter, type);
-                                }
+                                RenderController(htmlWriter, type);
                             }
 
                             //footer line
