@@ -19,6 +19,14 @@ namespace example {
 
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
+            routes.MapRoute("RouteTest1",
+                "RouteTest/{action}",
+                new { controller = "Test" });
+
+            routes.MapRoute("RouteTest2",
+                "Hello",
+                new { controller = "Test", action = "HelloGet" });
+
             routes.MapRoute(
                 "Default", // Route name
                 "{controller}/{action}/{id}", // URL with parameters
