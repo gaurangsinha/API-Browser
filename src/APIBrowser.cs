@@ -226,6 +226,19 @@ namespace Webtools {
                     return null != para ? para.FirstOrDefault() : null;
                 });
         }
+
+        /// <summary>
+        /// Fetches the routes.
+        /// </summary>
+        /// <param name="method">The method.</param>
+        /// <returns></returns>
+        private string FetchRoutes(MethodInfo method) {
+            VirtualPathData defaultPath = RouteTable.Routes.GetVirtualPath(null, new RouteValueDictionary { 
+                    { "controller", method.DeclaringType.Name.Replace("Controller", string.Empty) }, 
+                    { "action", method.Name } 
+            });
+            return null != defaultPath ? defaultPath.VirtualPath : null;
+        }
         #endregion
 
         #region Render Methods
@@ -393,7 +406,7 @@ namespace Webtools {
         /// <param name="htmlWriter">The HTML writer.</param>
         /// <param name="method">The method.</param>
         private void RenderMethod(HtmlTextWriter htmlWriter, MethodInfo method) {
-            string formAction = string.Format("/{0}/{1}", method.ReflectedType.Name.Replace("Controller", string.Empty), method.Name);
+            string formAction = FetchRoutes(method); //string.Format("/{0}/{1}", method.ReflectedType.Name.Replace("Controller", string.Empty), method.Name);
             string formId = string.Format("{0}_{1}", method.ReflectedType.Name.Replace("Controller", string.Empty), method.Name);
             string httpMethod = IsMvcActionMethod(method);
 
