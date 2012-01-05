@@ -553,14 +553,22 @@ namespace Webtools {
 
                 htmlWriter.Write("&nbsp;");
 
+                htmlWriter.AddAttribute(HtmlTextWriterAttribute.Id, formId + "_response_time");
+                htmlWriter.AddAttribute(HtmlTextWriterAttribute.Style, "display: none;");
+                htmlWriter.RenderBeginTag(HtmlTextWriterTag.Div);
+                htmlWriter.Write("-");
+                htmlWriter.RenderEndTag();
+
+                htmlWriter.Write("&nbsp;");
+
                 htmlWriter.AddAttribute(HtmlTextWriterAttribute.Id, formId + "_response_hider");
                 htmlWriter.AddAttribute(HtmlTextWriterAttribute.Href, "#");
-                htmlWriter.AddAttribute(HtmlTextWriterAttribute.Onclick, "$('#" + formId + "_response').slideUp();$(this).fadeOut();return false;");
+                htmlWriter.AddAttribute(HtmlTextWriterAttribute.Onclick, "$('#" + formId + "_response').slideUp();$('#" + formId + "_response_time').fadeOut();$(this).fadeOut();return false;");
                 htmlWriter.AddAttribute(HtmlTextWriterAttribute.Style, "display: none");
                 htmlWriter.RenderBeginTag(HtmlTextWriterTag.A);
                     htmlWriter.Write("Hide Responses");
                 htmlWriter.RenderEndTag();
-
+                
             //close form
             htmlWriter.RenderEndTag();
 

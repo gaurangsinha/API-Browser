@@ -7,6 +7,7 @@
         });
 
         var responseBox = $("#" + this.attributes['id'].value + '_response');
+        var startTime = new Date();
 
         //checkout http://jquery.com/api for more syntax and options on this method.
         jQuery.ajax({
@@ -15,6 +16,11 @@
             type: this.method,
             error: function (jqXHR, textStatus, errorThrown) {
                 //bg colour - #f6dbfc (Reddish)
+                var endTime = new Date();
+                var responseTime = $("#" + responseBox.attr("id") + "_time");
+                responseTime.text(' Response Time : ' + (endTime.getTime() - startTime.getTime()) + 'ms ');
+                responseTime.attr('style', 'display: inline; background-color: #fcf6db; border: 1px solid #e5e0c6;');
+
                 responseBox.attr('style', 'display: block');
 
                 var hideButton = $("#" + responseBox.attr("id") + "_hider");
@@ -33,6 +39,11 @@
             },
             success: function (data, status, xhr) {
                 //bg colour - #fcf6db (Yellowish)
+                var endTime = new Date();
+                var responseTime = $("#" + responseBox.attr("id") + "_time");
+                responseTime.text(' Response Time : ' + (endTime.getTime() - startTime.getTime()) + 'ms ');
+                responseTime.attr('style', 'display: inline; background-color: #fcf6db; border: 1px solid #e5e0c6;');
+
                 responseBox.attr('style', 'display: block');
 
                 var hideButton = $("#" + responseBox.attr("id") + "_hider");
