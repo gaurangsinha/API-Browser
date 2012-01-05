@@ -3,6 +3,16 @@ API Browser
 
 This library automatically creates a page containing all the REST API calls present in the controller files of an ASP.NET MVC3 project.
 
+![](http://s3.amazonaws.com/files.posterous.com/temp-2011-12-19/jyaqyxoDxedkEtdmvHxlIbummdcBGmhbCaazoBEyHylDDbfygoeJHsfEfxhr/APIBrowser.png.scaled1000.png?AWSAccessKeyId=AKIAJFZAE65UYRT34AOQ&Expires=1325797642&Signature=pTpmyUqXjhJ50aZUepNDw5X8rSg%3D)
+
+Method with parameters and comments
+
+![](http://s3.amazonaws.com/files.posterous.com/temp-2011-12-19/DcyujdybroBfujedckpzbdurzhgajsuafitslmuazoBhmkHGHqsGfBidxkjx/APIBrowser_Parameters.png.scaled1000.png?AWSAccessKeyId=AKIAJFZAE65UYRT34AOQ&Expires=1325797773&Signature=LSbzeF5lN9W69J6%2Bdd4eKad7Qhk%3D)
+
+Response
+
+![](http://s3.amazonaws.com/files.posterous.com/temp-2011-12-19/ffFqDJjskhDAzFeEzyvseHDemFJhdbdfxsIibgAAFnxHHgaBrdjeGrasBuvI/APIBrowser_Response.png.scaled1000.png?AWSAccessKeyId=AKIAJFZAE65UYRT34AOQ&Expires=1325797869&Signature=yqj4CmsHC8Y5nHmpttwXmNGAGyk%3D)
+
 Setting up API Browser
 ----------------------
 
