@@ -239,6 +239,18 @@ namespace Webtools {
             });
             return null != defaultPath ? defaultPath.VirtualPath : null;
         }
+
+        /// <summary>
+        /// Get specified assembly attribute
+        /// </summary>
+        /// <typeparam name="T">Attribute type</typeparam>
+        /// <returns></returns>
+        private static T GetAssemblyAttribute<T>() where T : Attribute {
+            object[] attributes = Assembly.GetCallingAssembly().GetCustomAttributes(typeof(T), false);
+            return (null == attributes || 0 == attributes.Length)
+                    ? default(T)
+                    : (T)attributes[0];
+        }
         #endregion
 
         #region Render Methods
@@ -258,55 +270,12 @@ namespace Webtools {
                
                 //begin page
                 htmlWriter.RenderBeginTag(HtmlTextWriterTag.Html);
-
-                    htmlWriter.RenderBeginTag(HtmlTextWriterTag.Head);
-                
-                        //title
-                        htmlWriter.RenderBeginTag(HtmlTextWriterTag.Title);
-                            htmlWriter.Write("API Browser");
-                        htmlWriter.RenderEndTag();
-
-                        //css
-                        htmlWriter.AddAttribute(HtmlTextWriterAttribute.Type, "text/css");
-                        htmlWriter.RenderBeginTag(HtmlTextWriterTag.Style);                
-                            htmlWriter.Write(RetrieveEmbeddedResource("Webtools.APIBrowser.Styles.css"));
-                        htmlWriter.RenderEndTag();
-
-                        //prettify css
-                        htmlWriter.AddAttribute(HtmlTextWriterAttribute.Type, "text/css");
-                        htmlWriter.AddAttribute(HtmlTextWriterAttribute.Href, "http://google-code-prettify.googlecode.com/svn/branches/release-1-Jun-2011/src/prettify.css");
-                        htmlWriter.AddAttribute(HtmlTextWriterAttribute.Rel, "stylesheet");
-                        htmlWriter.RenderBeginTag(HtmlTextWriterTag.Link);
-                        htmlWriter.RenderEndTag();
-
-                        //jQuery
-                        htmlWriter.AddAttribute(HtmlTextWriterAttribute.Type, "text/javascript");
-                        htmlWriter.AddAttribute(HtmlTextWriterAttribute.Src, "http://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js");
-                        htmlWriter.RenderBeginTag(HtmlTextWriterTag.Script);
-                        htmlWriter.RenderEndTag();
-
-                        //google code pretty print
-                        htmlWriter.AddAttribute(HtmlTextWriterAttribute.Type, "text/javascript");
-                        htmlWriter.AddAttribute(HtmlTextWriterAttribute.Src, "http://google-code-prettify.googlecode.com/svn/branches/release-1-Jun-2011/src/prettify.js");
-                        htmlWriter.RenderBeginTag(HtmlTextWriterTag.Script);
-                        htmlWriter.RenderEndTag();
-
-                        //custom javascript
-                        htmlWriter.AddAttribute(HtmlTextWriterAttribute.Type, "text/javascript");
-                        htmlWriter.RenderBeginTag(HtmlTextWriterTag.Script);
-                            htmlWriter.Write(RetrieveEmbeddedResource("Webtools.APIBrowser.Async.js"));
-                        htmlWriter.RenderEndTag();
-
-                    htmlWriter.RenderEndTag();
-
+                    //Render head
+                    RenderPageHead(htmlWriter);
                     //begin body
                     htmlWriter.RenderBeginTag(HtmlTextWriterTag.Body);
-
                         //header
-                        htmlWriter.RenderBeginTag(HtmlTextWriterTag.H1);
-                        htmlWriter.Write("API Browser");
-                        htmlWriter.RenderEndTag();
-
+                        RenderTag(htmlWriter, HtmlTextWriterTag.H1, "API Browser");
                         //Render all the controller types
                         htmlWriter.AddAttribute(HtmlTextWriterAttribute.Id, "content");
                         htmlWriter.RenderBeginTag(HtmlTextWriterTag.Div);
@@ -316,54 +285,97 @@ namespace Webtools {
                             }
 
                             //footer line
-                            htmlWriter.RenderBeginTag(HtmlTextWriterTag.Hr);
-                            htmlWriter.RenderEndTag();
-
+                            RenderTag(htmlWriter, HtmlTextWriterTag.Hr);
                             //assemblies displayed
-                            htmlWriter.RenderBeginTag(HtmlTextWriterTag.H3);
-                            htmlWriter.Write("Reflected Assemblies");
-                            htmlWriter.RenderEndTag();
+                            RenderTag(htmlWriter, HtmlTextWriterTag.H3, "Reflected Assemblies");
                             htmlWriter.WriteBreak();
-                            foreach (var a in AssembliesDisplayed) {
-                                htmlWriter.AddAttribute(HtmlTextWriterAttribute.Href, a.EscapedCodeBase);
-                                htmlWriter.RenderBeginTag(HtmlTextWriterTag.A);
-                                    htmlWriter.Write(a.EscapedCodeBase);
-                                htmlWriter.RenderEndTag();
+                            foreach (var ass in AssembliesDisplayed) {
+                                RenderTag(htmlWriter, HtmlTextWriterTag.A, ass.EscapedCodeBase, Tuple.Create(HtmlTextWriterAttribute.Href, ass.EscapedCodeBase));
                                 htmlWriter.WriteBreak();
-                                htmlWriter.Write(a.FullName);
+                                htmlWriter.Write(ass.FullName);
                                 htmlWriter.WriteBreak();
-                                htmlWriter.Write("Documentation : {0}", DocumentationExists(a.CodeBase) ? "Found" : "Not Found");
+                                htmlWriter.Write("Documentation : {0}", DocumentationExists(ass.CodeBase) ? "Found" : "Not Found");
                                 htmlWriter.WriteBreak();
                             }
-
                             //footer line
-                            htmlWriter.RenderBeginTag(HtmlTextWriterTag.Hr);
-                            htmlWriter.RenderEndTag();
-
+                            RenderTag(htmlWriter, HtmlTextWriterTag.Hr);
                             //footer text
-                            htmlWriter.AddAttribute(HtmlTextWriterAttribute.Class, "footer");
-                            htmlWriter.RenderBeginTag(HtmlTextWriterTag.Div);
-                                htmlWriter.Write("Powered by ");
-                                htmlWriter.AddAttribute(HtmlTextWriterAttribute.Href, "https://github.com/gaurangsinha/API-Browser");
-                                htmlWriter.RenderBeginTag(HtmlTextWriterTag.A);                
-                                    htmlWriter.Write("API Browser");
-                                htmlWriter.RenderEndTag();
-                                htmlWriter.Write(", Version {0}", Assembly.GetExecutingAssembly().GetName().Version.ToString());
-                                htmlWriter.WriteBreak();
-                                htmlWriter.Write("MIT License, Copyright (C) 2011 ");
-                                htmlWriter.AddAttribute(HtmlTextWriterAttribute.Href, "http://gaurangs.com");
-                                htmlWriter.RenderBeginTag(HtmlTextWriterTag.A);
-                                    htmlWriter.Write("Gaurang Sinha");
-                                htmlWriter.RenderEndTag();
-                            htmlWriter.RenderEndTag();
+                            RenderPageFooter(htmlWriter);
+
                         htmlWriter.RenderEndTag();
 
                     //close body
                     htmlWriter.RenderEndTag();
-
                 //close html
                 htmlWriter.RenderEndTag();
             }
+        }
+
+        /// <summary>
+        /// Renders the page head.
+        /// </summary>
+        /// <param name="htmlWriter">The HTML writer.</param>
+        private void RenderPageHead(HtmlTextWriter htmlWriter) {
+            htmlWriter.RenderBeginTag(HtmlTextWriterTag.Head);
+
+            //title
+            RenderTag(htmlWriter, HtmlTextWriterTag.Title, "API Browser");
+
+            //css
+            RenderTag(htmlWriter,
+                HtmlTextWriterTag.Style,
+                RetrieveEmbeddedResource("Webtools.APIBrowser.Styles.css"),
+                Tuple.Create(HtmlTextWriterAttribute.Type, "text/css"));
+
+            //prettify css
+            RenderTag(htmlWriter, HtmlTextWriterTag.Link, null,
+                Tuple.Create(HtmlTextWriterAttribute.Type, "text/css"),
+                Tuple.Create(HtmlTextWriterAttribute.Href, "http://google-code-prettify.googlecode.com/svn/branches/release-1-Jun-2011/src/prettify.css"),
+                Tuple.Create(HtmlTextWriterAttribute.Rel, "stylesheet"));
+
+            //jQuery
+            RenderTag(htmlWriter, HtmlTextWriterTag.Script, null,
+                Tuple.Create(HtmlTextWriterAttribute.Type, "text/javascript"),
+                Tuple.Create(HtmlTextWriterAttribute.Src, "http://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"));
+
+            //google code pretty print
+            RenderTag(htmlWriter, HtmlTextWriterTag.Script, null,
+                Tuple.Create(HtmlTextWriterAttribute.Type, "text/javascript"),
+                Tuple.Create(HtmlTextWriterAttribute.Src, "http://google-code-prettify.googlecode.com/svn/branches/release-1-Jun-2011/src/prettify.js"));
+
+            //custom javascript
+            RenderTag(htmlWriter,
+                HtmlTextWriterTag.Script,
+                RetrieveEmbeddedResource("Webtools.APIBrowser.Async.js"),
+                Tuple.Create(HtmlTextWriterAttribute.Type, "text/javascript"));
+
+            htmlWriter.RenderEndTag();
+        }
+
+        /// <summary>
+        /// Renders the page footer.
+        /// </summary>
+        /// <param name="htmlWriter">The HTML writer.</param>
+        private void RenderPageFooter(HtmlTextWriter htmlWriter) {
+            htmlWriter.AddAttribute(HtmlTextWriterAttribute.Class, "footer");
+            htmlWriter.RenderBeginTag(HtmlTextWriterTag.Div);
+            htmlWriter.Write("Powered by ");
+
+            RenderTag(htmlWriter, 
+                HtmlTextWriterTag.A, 
+                "API Browser", 
+                Tuple.Create(HtmlTextWriterAttribute.Href, "https://github.com/gaurangsinha/API-Browser"));
+            
+            htmlWriter.Write(", Version {0}", GetAssemblyAttribute<AssemblyFileVersionAttribute>().Version ?? string.Empty);
+            htmlWriter.WriteBreak();
+            htmlWriter.Write(GetAssemblyAttribute<AssemblyCopyrightAttribute>().Copyright);
+
+            RenderTag(htmlWriter,
+                HtmlTextWriterTag.A,
+                "Gaurang Sinha",
+                Tuple.Create(HtmlTextWriterAttribute.Href, "http://gaurangs.com"));
+            
+            htmlWriter.RenderEndTag();            
         }
 
         /// <summary>
@@ -381,9 +393,7 @@ namespace Webtools {
                         if (false == titleHeaderExists) {
                             if (DocumentationExists(controller.Assembly.CodeBase))
                                 htmlWriter.AddAttribute(HtmlTextWriterAttribute.Title, FetchDocumentation(controller.Assembly.CodeBase, controller));
-                            htmlWriter.RenderBeginTag(HtmlTextWriterTag.H2);
-                            htmlWriter.Write("/" + controller.Name.Replace("Controller", string.Empty));
-                            htmlWriter.RenderEndTag();
+                            RenderTag(htmlWriter, HtmlTextWriterTag.H2, "/" + controller.Name.Replace("Controller", string.Empty));
                             titleHeaderExists = true;
                             if (!AssembliesDisplayed.Contains(controller.Assembly)) {
                                 AssembliesDisplayed.Add(controller.Assembly);
@@ -412,19 +422,19 @@ namespace Webtools {
 
             //header
             htmlWriter.AddAttribute(HtmlTextWriterAttribute.Class, "heading_" + httpMethod.ToLower());
-            htmlWriter.RenderBeginTag(HtmlTextWriterTag.Div);            
+            htmlWriter.RenderBeginTag(HtmlTextWriterTag.Div);
             
                 htmlWriter.RenderBeginTag(HtmlTextWriterTag.H3);
 
                     htmlWriter.AddAttribute(HtmlTextWriterAttribute.Class, "http_method");
                     htmlWriter.RenderBeginTag(HtmlTextWriterTag.Span);
 
-                        htmlWriter.AddAttribute(HtmlTextWriterAttribute.Name, formAction);
-                        htmlWriter.AddAttribute(HtmlTextWriterAttribute.Href, "#" + formAction);
-                        htmlWriter.AddAttribute(HtmlTextWriterAttribute.Onclick, "$('#" + formId + "_content').slideToggle(500);");
-                        htmlWriter.RenderBeginTag(HtmlTextWriterTag.A);
-                            htmlWriter.Write(IsMvcActionMethod(method));
-                        htmlWriter.RenderEndTag();
+                        RenderTag(htmlWriter,
+                            HtmlTextWriterTag.A,
+                            IsMvcActionMethod(method),
+                            Tuple.Create(HtmlTextWriterAttribute.Name, formAction),
+                            Tuple.Create(HtmlTextWriterAttribute.Href, "#" + formAction),
+                            Tuple.Create(HtmlTextWriterAttribute.Onclick, "$('#" + formId + "_content').slideToggle(500);"));
 
                     htmlWriter.RenderEndTag();
 
@@ -472,9 +482,7 @@ namespace Webtools {
                     htmlWriter.WriteBreak();
                     string returnSummary = FetchDocumentation(methodInfo.DeclaringType.Assembly.CodeBase, methodInfo, "returns");
                     if (!string.IsNullOrEmpty(returnSummary)) {
-                        htmlWriter.RenderBeginTag(HtmlTextWriterTag.B);
-                        htmlWriter.Write("Returns: ");
-                        htmlWriter.RenderEndTag();
+                        RenderTag(htmlWriter, HtmlTextWriterTag.B, "Returns: ");
                         htmlWriter.Write(returnSummary);
                         htmlWriter.WriteBreak();
                     }
@@ -490,19 +498,11 @@ namespace Webtools {
                     htmlWriter.RenderBeginTag(HtmlTextWriterTag.Table);
                     htmlWriter.RenderBeginTag(HtmlTextWriterTag.Thead);
                     htmlWriter.RenderBeginTag(HtmlTextWriterTag.Tr);
-                    htmlWriter.RenderBeginTag(HtmlTextWriterTag.Th);
-                    htmlWriter.Write("Parameter");
-                    htmlWriter.RenderEndTag();
-                    htmlWriter.RenderBeginTag(HtmlTextWriterTag.Th);
-                    htmlWriter.Write("Value");
-                    htmlWriter.RenderEndTag();
-                    htmlWriter.RenderBeginTag(HtmlTextWriterTag.Th);
-                    htmlWriter.Write("Type");
-                    htmlWriter.RenderEndTag();
+                    RenderTag(htmlWriter, HtmlTextWriterTag.Th, "Parameter");
+                    RenderTag(htmlWriter, HtmlTextWriterTag.Th, "Value");
+                    RenderTag(htmlWriter, HtmlTextWriterTag.Th, "Type");
                     if (DocumentationExists(methodInfo.DeclaringType.Assembly.CodeBase)) {
-                        htmlWriter.RenderBeginTag(HtmlTextWriterTag.Th);
-                        htmlWriter.Write("Comment");
-                        htmlWriter.RenderEndTag();
+                        RenderTag(htmlWriter, HtmlTextWriterTag.Th, "Comment");
                         addComments = true;
                     }
                     htmlWriter.RenderEndTag();
@@ -512,23 +512,22 @@ namespace Webtools {
                     foreach (var parameter in parameters) {
                         htmlWriter.RenderBeginTag(HtmlTextWriterTag.Tr);
                         htmlWriter.AddAttribute(HtmlTextWriterAttribute.Title, FetchDocumentation(methodInfo.DeclaringType.Assembly.CodeBase, methodInfo, parameter));
+
+                        RenderTag(htmlWriter, HtmlTextWriterTag.Td, parameter.Name);
+                        
                         htmlWriter.RenderBeginTag(HtmlTextWriterTag.Td);
-                        htmlWriter.Write(parameter.Name);
+
+                        RenderTag(htmlWriter, HtmlTextWriterTag.Input, null,
+                            Tuple.Create(HtmlTextWriterAttribute.Id, formId + "_" + parameter.Name),
+                            Tuple.Create(HtmlTextWriterAttribute.Type, "text"),
+                            Tuple.Create(HtmlTextWriterAttribute.Name, parameter.Name));
+                        
                         htmlWriter.RenderEndTag();
-                        htmlWriter.RenderBeginTag(HtmlTextWriterTag.Td);
-                        htmlWriter.AddAttribute(HtmlTextWriterAttribute.Id, formId + "_" + parameter.Name);
-                        htmlWriter.AddAttribute(HtmlTextWriterAttribute.Type, "text");
-                        htmlWriter.AddAttribute(HtmlTextWriterAttribute.Name, parameter.Name);
-                        htmlWriter.RenderBeginTag(HtmlTextWriterTag.Input);
-                        htmlWriter.RenderEndTag();
-                        htmlWriter.RenderEndTag();
-                        htmlWriter.RenderBeginTag(HtmlTextWriterTag.Td);
-                        htmlWriter.Write(parameter.ParameterType.Name);
-                        htmlWriter.RenderEndTag();
+
+                        RenderTag(htmlWriter, HtmlTextWriterTag.Td, parameter.ParameterType.Name);
+                        
                         if (addComments) {
-                            htmlWriter.RenderBeginTag(HtmlTextWriterTag.Td);
-                            htmlWriter.Write(FetchDocumentation(methodInfo.DeclaringType.Assembly.CodeBase, methodInfo, parameter));
-                            htmlWriter.RenderEndTag();
+                            RenderTag(htmlWriter, HtmlTextWriterTag.Td, FetchDocumentation(methodInfo.DeclaringType.Assembly.CodeBase, methodInfo, parameter));
                         }
                         htmlWriter.RenderEndTag();
                     }
@@ -541,15 +540,13 @@ namespace Webtools {
                 }
                 else {
                     //Show method requires no parameters
-                    htmlWriter.RenderBeginTag(HtmlTextWriterTag.I);
-                    htmlWriter.Write("Method has no paramaters");
-                    htmlWriter.RenderEndTag();
+                    RenderTag(htmlWriter, HtmlTextWriterTag.I, "Method has no paramaters");
                     htmlWriter.WriteBreak();
                 }
-                htmlWriter.AddAttribute(HtmlTextWriterAttribute.Type, "submit");
-                htmlWriter.AddAttribute(HtmlTextWriterAttribute.Value, "Submit");
-                htmlWriter.RenderBeginTag(HtmlTextWriterTag.Input);
-                htmlWriter.RenderEndTag();
+
+                RenderTag(htmlWriter, HtmlTextWriterTag.Input, null,
+                    Tuple.Create(HtmlTextWriterAttribute.Type, "submit"),
+                    Tuple.Create(HtmlTextWriterAttribute.Value, "Submit"));
 
                 htmlWriter.Write("&nbsp;");
 
@@ -608,6 +605,34 @@ namespace Webtools {
 
             htmlWriter.RenderEndTag();
         }
+        #endregion
+
+        #region Render Helpers
+
+        /// <summary>
+        /// Renders the tag.
+        /// </summary>
+        /// <param name="htmlWriter">The HTML writer.</param>
+        /// <param name="tag">The tag.</param>
+        /// <param name="value">The value.</param>
+        /// <param name="attributes">The attributes.</param>
+        private void RenderTag(HtmlTextWriter htmlWriter, HtmlTextWriterTag tag, string value=null, params Tuple<HtmlTextWriterAttribute, string>[] attributes) {
+            //Add attributes
+            if (null != attributes && attributes.Length > 0) {
+                foreach (var attr in attributes) {
+                    htmlWriter.AddAttribute(attr.Item1, attr.Item2);
+                }
+            }
+            
+            htmlWriter.RenderBeginTag(tag);
+
+            if (null != value) {
+                htmlWriter.Write(value);
+            }
+
+            htmlWriter.RenderEndTag();
+        }
+
         #endregion
     }
 }
