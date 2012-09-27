@@ -1,9 +1,11 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "APIBrowser", "src\APIBrowser.csproj", "{32C6849D-F8ED-4FC2-B4E6-6695C65DE707}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "test\Test.csproj", "{548C6892-F0FC-42A3-BEF7-408D0607D9C2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test4", "Test4\Test4.csproj", "{499978AD-2E6B-44EA-A177-0618A2161199}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,6 +21,10 @@ Global
 		{548C6892-F0FC-42A3-BEF7-408D0607D9C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{548C6892-F0FC-42A3-BEF7-408D0607D9C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{548C6892-F0FC-42A3-BEF7-408D0607D9C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{499978AD-2E6B-44EA-A177-0618A2161199}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{499978AD-2E6B-44EA-A177-0618A2161199}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{499978AD-2E6B-44EA-A177-0618A2161199}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{499978AD-2E6B-44EA-A177-0618A2161199}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
